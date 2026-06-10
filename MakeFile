@@ -1,0 +1,21 @@
+CC = gcc
+CFLAGS = -std=c11 -Wall -Wextra -g
+INCLUDES = -I. -Iinclude
+
+SRCS = $(wildcard src/*.c)
+TARGET = clcas
+
+.PHONY: all clean run debug
+
+all: $(TARGET)
+
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^
+
+clean:
+	@if exist "$(TARGET).exe" del /q "$(TARGET).exe"
+	@if exist "$(TARGET)" del /q "$(TARGET)"
+
+debug: CFLAGS += -O0 -ggdb
+debug: clean all
+
