@@ -33,10 +33,10 @@ typedef struct {
     Token current;
 } Lexer;
 
-void  lexer_init(Lexer *l, const char *src);
+void  lexer_init(Lexer *lexer, const char *source);
 
-Token lexer_next(Lexer *l); // Advances and returns token
+Token lexer_next(Lexer *lexer); // Advances and returns token
 
-Token lexer_peek(Lexer *l); // Returns without advancing
+Token lexer_peek(Lexer *lexer); // Returns without advancing
 
 #endif
