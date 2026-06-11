@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -g
-INCLUDES = -I. -Iinclude
+INCLUDES = -Iinclude
 
 SRCS = $(wildcard src/*.c)
 TARGET = clcas

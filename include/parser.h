@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#define TOKEN_IDENTIFIER_LENGTH 16
+
 typedef enum {
     TOK_NUM, 
     TOK_IDENT, 
@@ -22,7 +24,7 @@ typedef struct {
     
     double num;
     
-    char ident[16];
+    char ident[TOKEN_IDENTIFIER_LENGTH];
 } Token;
 
 typedef struct {
@@ -33,10 +35,10 @@ typedef struct {
     Token current;
 } Lexer;
 
-void  lexer_init(Lexer *lexer, const char *source);
+void lexer_init(Lexer* lexer, const char* source);
 
-Token lexer_next(Lexer *lexer); // Advances and returns token
+Token lexer_next(Lexer* lexer); // Advances and returns token
 
-Token lexer_peek(Lexer *lexer); // Returns without advancing
+Token lexer_peek(Lexer* lexer); // Returns without advancing
 
 #endif

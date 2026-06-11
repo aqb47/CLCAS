@@ -1,11 +1,14 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 // Maximum length of function name for function nodes 
 #define FUNCTION_NAME_LENGTH 8
+
+typedef struct Node Node;
 
 typedef enum {
     NODE_NUM, // Rational constants
@@ -26,7 +29,7 @@ typedef enum {
 } NodeType;
 
 // Nodes comprising the abstract syntax tree. A node will have a type and data (depending on that type it is)
-typedef struct {
+struct Node {
     NodeType type;
 
     // Node data
@@ -49,24 +52,24 @@ typedef struct {
             Node* child;
         } Function; // For NODE_FUNC (sin, cos, tan)
     };
-} Node;
+};
 
 // Node initialization functions
 Node* node_num(double value);
 
 Node* node_var(char variable);
 
-Node* node_binop(NodeType type, Node *node_left, Node *node_right);
+Node* node_binop(NodeType type, Node* node_left, Node* node_right);
 
-Node* node_neg(Node *child);
+Node* node_neg(Node* child);
 
-Node* node_func(const char *function_name, Node *child);
+Node* node_func(const char* function_name, Node* child);
 
 // Other node stuff
-Node* node_copy(const Node *node); // Deep copy
+Node* node_copy(const Node* node); // Deep copy
 
-void node_free(Node *node);         
+void node_free(Node* node);         
 
-void node_print(const Node *node);  
+void node_print(const Node* node);  
 
 #endif
