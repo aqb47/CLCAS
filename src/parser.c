@@ -4,17 +4,26 @@
 #include <ctype.h>
 #include <string.h>
 
+static Token lexer_next(Lexer* lexer);
+static Token lexer_peek(Lexer* lexer);
+
 static Token lexer_scan(Lexer* lexer);
 
 static int left_binding_power(TokType token_type);
 static int right_binding_power(TokType token_type);
+
 static int is_operation(TokType token_type);
+
 static NodeType toktype_to_nodetype(TokType token_type);
 
 static Node* parse_prefix(Lexer* lexer);
 
 Node* parse_expr(Lexer* lexer, int min_binding_power) {
+    // Parse left hand side (handles unary functions and operations)
     Node* lhs = parse_prefix(lexer);
+    if (lhs == NULL) {
+        return NULL;
+    }
 
     while (1) {
         // Check for valid binary infix operation
@@ -36,9 +45,9 @@ Node* parse_expr(Lexer* lexer, int min_binding_power) {
         // Consume token
         operation = lexer_next(lexer);
 
-        // Build tree
         NodeType operation_nodetype = toktype_to_nodetype(operation.type);
 
+        // Recursively parse right hand side
         Node* rhs = parse_expr(lexer, rbp);
         
         lhs = node_binop(operation_nodetype, lhs, rhs);
@@ -53,6 +62,7 @@ void lexer_init(Lexer* lexer, const char* source) {
     lexer->has_peek = 0;
 }
 
+// Advance position and return next token of lexer. This is the base for lexer next and peek functions
 Token lexer_scan(Lexer* lexer) {
     Token output_token;
 
@@ -81,6 +91,7 @@ Token lexer_scan(Lexer* lexer) {
         }
         number_string[i] = '\0';
 
+        // Convert number string to number
         double number_value = strtod(number_string, &end);
 
         output_token.number = number_value;
@@ -114,7 +125,7 @@ Token lexer_scan(Lexer* lexer) {
             case(')'): output_token.type = TOK_RPAREN; break;
             
             // Unknown symbol
-            default: output_token.type = TOK_ERR;
+            default: output_token.type = TOK_ERR; printf("Unknown symbol\n");
         }
 
         lexer->position += 1;
@@ -123,8 +134,9 @@ Token lexer_scan(Lexer* lexer) {
     return output_token;
 }
 
+// Advances and returns token
 Token lexer_next(Lexer* lexer) {
-    // If we have peeked return generated peeked token, and if not advance directly by scanning
+    // If we have peeked return generated peeked token and 'discard' it, and if not advance directly by scanning
     if (lexer->has_peek) {
         lexer->has_peek = 0;
         return lexer->peeked;
@@ -134,6 +146,7 @@ Token lexer_next(Lexer* lexer) {
     }
 }
 
+// Returns without advancing
 Token lexer_peek(Lexer* lexer) {
     Token peeked;
 
@@ -151,28 +164,36 @@ Token lexer_peek(Lexer* lexer) {
     return peeked;
 }
 
+// For parsing the left hand side of an expression and defining prefix behaviour of a token
 Node* parse_prefix(Lexer* lexer) {
     Token token = lexer_peek(lexer);
+    if (token.type == TOK_ERR || token.type == TOK_EOF) {
+        return NULL;
+    }
 
-    // Rational constant
+    // Rational constants
     if (token.type == TOK_NUM) {
+        // Consume
         token = lexer_next(lexer);
 
         return node_num(token.number);
     }
 
     else if (token.type == TOK_IDENT) {
-        // Variable
+        // Variables will be counted as single letter strings ("x", "y", "z" etc.)
         if (strlen(token.identifier) == 1) {
+            // Consume
             token = lexer_next(lexer);
 
             return node_var(token.identifier[0]);
         }
-        // Function
+
+        // Functions will be counted as multi letter strings
         else {
             char function_name[TOKEN_IDENTIFIER_LENGTH];
             Node* function_argument;
 
+            // Consume
             token = lexer_next(lexer);
             
             // Save function name
@@ -194,6 +215,8 @@ Node* parse_prefix(Lexer* lexer) {
             // Expect ')'
             token = lexer_peek(lexer);
             if (token.type != TOK_RPAREN) {
+                node_free(function_argument);
+
                 return NULL;
             }
             token = lexer_next(lexer);
@@ -206,13 +229,20 @@ Node* parse_prefix(Lexer* lexer) {
     else if (token.type == TOK_LPAREN) {
         Node* inner_expression;
 
+        // Consume
         token = lexer_next(lexer);
 
+        // Parse inner stuff
         inner_expression = parse_expr(lexer, 0);
+        if (inner_expression == NULL) {
+            return NULL;
+        }
 
         // Expect ')'
         token = lexer_peek(lexer);
         if (token.type != TOK_RPAREN){
+            node_free(inner_expression);
+
             return NULL;
         }
         token = lexer_next(lexer);
@@ -224,10 +254,14 @@ Node* parse_prefix(Lexer* lexer) {
     else if (token.type == TOK_MINUS) {
         Node* inner_expression;
 
+        // Consume
         token = lexer_next(lexer);
 
         // Binding power of right side of unary minus is +5
         inner_expression = parse_expr(lexer, 5);
+        if (inner_expression == NULL) {
+            return NULL;
+        }
 
         return node_neg(inner_expression);
     }
@@ -242,6 +276,7 @@ Node* parse_prefix(Lexer* lexer) {
 
 // Left-associative operators have higher right binding power
 // Right-associative operators have higher left binding power
+
 int left_binding_power(TokType token_type) {
     switch (token_type) {
         case(TOK_PLUS): return 1;
@@ -283,9 +318,12 @@ NodeType toktype_to_nodetype(TokType token_type) {
     switch (token_type) {
         case(TOK_PLUS): return NODE_ADD;
         case(TOK_MINUS): return NODE_SUB;
+        
         case(TOK_STAR): return NODE_MUL;
         case(TOK_SLASH): return NODE_DIV;
+        
         case(TOK_CARET): return NODE_POW;
+
         default: return NODE_ERR;
     }
 }

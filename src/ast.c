@@ -32,7 +32,7 @@ Node* node_var(char variable) {
 
 Node* node_binop(NodeType type, Node* node_left, Node* node_right) {
     Node* output_node_ptr = malloc(sizeof(Node));
-    if (output_node_ptr == NULL) {
+    if (output_node_ptr == NULL || node_left == NULL || node_right == NULL) {
         return NULL;
     }
 
@@ -45,7 +45,7 @@ Node* node_binop(NodeType type, Node* node_left, Node* node_right) {
 
 Node* node_neg(Node* child) {
     Node* output_node_ptr = malloc(sizeof(Node));
-    if (output_node_ptr == NULL) {
+    if (output_node_ptr == NULL || child == NULL) {
         return NULL;
     }
 
@@ -57,7 +57,7 @@ Node* node_neg(Node* child) {
 
 Node* node_func(const char* function_name, Node* child) {
     Node* output_node_ptr = malloc(sizeof(Node));
-    if (output_node_ptr == NULL) {
+    if (output_node_ptr == NULL || child == NULL) {
         return NULL;
     }
 
@@ -92,6 +92,9 @@ void node_free(Node* node) {
 
         free(node);
     }
+    else if (node->type == NODE_ERR) {
+        return;
+    }
 
     // Binary operations
     else {
@@ -102,32 +105,32 @@ void node_free(Node* node) {
     }
 }
 
-void node_print(const Node* node) {
+void node_print_prefix(const Node* node) {
     // Base cases
     if (node == NULL) {
-        printf("? ");
+        printf("?");
     }
 
     else if (node->type == NODE_NUM) {
-        printf("%lf ", node->number);
+        printf("%g", node->number);
     }
     else if (node->type == NODE_VAR) {
-        printf("%c ", node->variable);
+        printf("%c", node->variable);
     }
 
     // Unary operations
     else if (node->type == NODE_NEG) {
         printf("-(");
         
-        node_print(node->UnaryOperation.child);
+        node_print_prefix(node->UnaryOperation.child);
         
-        printf(") ");
+        printf(")");
     }
     else if (node->type == NODE_FUNC) {
         printf("%s(", node->Function.function_name);
         
-        node_print(node->Function.child);
-        printf(") ");
+        node_print_prefix(node->Function.child);
+        printf(")");
     }
 
     // Binary operations
@@ -136,10 +139,53 @@ void node_print(const Node* node) {
 
         printf("(%c ", operation_symbol);
         
-        node_print(node->BinaryOperation.left_child);
-        node_print(node->BinaryOperation.right_child);
+        node_print_prefix(node->BinaryOperation.left_child);
+        printf(" ");
+        node_print_prefix(node->BinaryOperation.right_child);
         
-        printf(") ");
+        printf(")");
+    }
+}
+
+void node_print_infix(const Node* node) {
+    // Base cases
+    if (node == NULL) {
+        printf("?");
+    }
+
+    else if (node->type == NODE_NUM) {
+        printf("%g", node->number);
+    }
+    else if (node->type == NODE_VAR) {
+        printf("%c", node->variable);
+    }
+
+    // Unary operations
+    else if (node->type == NODE_NEG) {
+        printf("-(");
+        
+        node_print_infix(node->UnaryOperation.child);
+        
+        printf(")");
+    }
+    else if (node->type == NODE_FUNC) {
+        printf("%s(", node->Function.function_name);
+        
+        node_print_infix(node->Function.child);
+        printf(")");
+    }
+
+    // Binary operations
+    else {
+        char operation_symbol = get_operation_symbol(node->type);
+        
+        printf("(");
+        node_print_infix(node->BinaryOperation.left_child);
+
+        printf(" %c ", operation_symbol);
+
+        node_print_infix(node->BinaryOperation.right_child);
+        printf(")");
     }
 }
 

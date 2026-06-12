@@ -6,7 +6,10 @@
 #include <ctype.h>
 #include <string.h>
 
+// Maximum length of token identifier
 #define TOKEN_IDENTIFIER_LENGTH 16
+
+// Maximum length of number string to be converted to number of token
 #define TOKEN_NUMBER_MAX_LENGTH 25
 
 typedef enum {
@@ -32,7 +35,7 @@ typedef struct {
     
     double number; // TOK_NUM
     
-    char identifier[TOKEN_IDENTIFIER_LENGTH]; // TOK_IDENT
+    char identifier[TOKEN_IDENTIFIER_LENGTH]; // TOK_IDENT - variable letter / function name
 } Token;
 
 typedef struct {
@@ -42,17 +45,15 @@ typedef struct {
     
     Token current; // Current token on position
 
-    Token peeked; // Peeked token ahead of position
+    Token peeked; // Peeked token
 
-    int has_peek; // Is peeked token valid
+    int has_peek; // If we peeked already
 } Lexer;
 
+// Initialize lexer from source string
 void lexer_init(Lexer* lexer, const char* source);
 
-Token lexer_next(Lexer* lexer); // Advances and returns token
-
-Token lexer_peek(Lexer* lexer); // Returns without advancing
-
+// Parse lexer depending on a minimum binding power which represents operation precedence. Main Pratt parser, uses loop + recursion. Will return head of created abstract syntax tree
 Node* parse_expr(Lexer* lexer, int min_binding_power);
 
 #endif
