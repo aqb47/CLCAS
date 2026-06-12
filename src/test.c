@@ -1,22 +1,14 @@
 #include "ast.h"
 #include "parser.h"
+#include "simplify.h"
 
 int main(void) {
-    // Manual AST: x^2 + 1
-    Node *tree = node_binop(NODE_ADD,
-    node_binop(NODE_POW, node_var('x'), node_num(2)),
-    node_num(1));
-    
-    node_print_prefix(tree);
-    printf("\n");
-
-    node_free(tree);
-
     // Parser round-trip
     Lexer l; 
-    lexer_init(&l, "2^3^4");
+    lexer_init(&l, "1 + 2 + 3*4 + 9 - 8^2 + 8^(5/3)");
     
     Node *parsed = parse_expr(&l, 0);
+    simplify(parsed);
     
     node_print_infix(parsed);
     printf("\n");

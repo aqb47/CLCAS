@@ -216,6 +216,10 @@ Node* node_copy(const Node* node) {
         output_node_ptr = node_func(node->Function.function_name, output_node_child_ptr);
     }
 
+    else if (node->type == NODE_ERR) {
+        return NULL;
+    }
+
     // Binary operations
     else {
         Node* output_node_left_child_ptr = node_copy(node->BinaryOperation.left_child);
