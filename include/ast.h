@@ -26,6 +26,8 @@ typedef enum {
     // General unary functions
     NODE_NEG, // Minus (negation)
     NODE_FUNC, // Mathematical unary functions (sin, cos etc.)
+    
+    NODE_ERR,
 } NodeType;
 
 // Nodes comprising the abstract syntax tree. A node will have a type and data (depending on that type it is)

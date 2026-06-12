@@ -30,17 +30,21 @@ typedef enum {
 typedef struct {
     TokType type;
     
-    double number;
+    double number; // TOK_NUM
     
-    char identifier[TOKEN_IDENTIFIER_LENGTH];
+    char identifier[TOKEN_IDENTIFIER_LENGTH]; // TOK_IDENT
 } Token;
 
 typedef struct {
-    const char* source;
+    const char* source; // Input string
 
-    int position;
+    int position; // Which letter lexer is on within string
     
-    Token current;
+    Token current; // Current token on position
+
+    Token peeked; // Peeked token ahead of position
+
+    int has_peek; // Is peeked token valid
 } Lexer;
 
 void lexer_init(Lexer* lexer, const char* source);

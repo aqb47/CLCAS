@@ -160,22 +160,22 @@ Node* node_copy(const Node* node) {
 
     // Unary operations
     else if (node->type == NODE_NEG) {
-        output_node_ptr = node_neg(node->UnaryOperation.child);
-
-        output_node_ptr->UnaryOperation.child = node_copy(node->UnaryOperation.child);
+        Node* output_node_child_ptr = node_copy(node->UnaryOperation.child);
+        
+        output_node_ptr = node_neg(output_node_child_ptr);
     }
     else if (node->type == NODE_FUNC) {
-        output_node_ptr = node_func(node->Function.function_name, node->Function.child);
+        Node* output_node_child_ptr = node_copy(node->Function.child);
         
-        output_node_ptr->Function.child = node_copy(node->Function.child);
+        output_node_ptr = node_func(node->Function.function_name, output_node_child_ptr);
     }
 
     // Binary operations
     else {
-        output_node_ptr = node_binop(node->type, node->BinaryOperation.left_child, node->BinaryOperation.right_child);
+        Node* output_node_left_child_ptr = node_copy(node->BinaryOperation.left_child);
+        Node* output_node_right_child_ptr = node_copy(node->BinaryOperation.right_child);
 
-        output_node_ptr->BinaryOperation.left_child = node_copy(node->BinaryOperation.left_child);
-        output_node_ptr->BinaryOperation.right_child = node_copy(node->BinaryOperation.right_child);
+        output_node_ptr = node_binop(node->type, output_node_left_child_ptr, output_node_right_child_ptr);
     }
 
     return output_node_ptr;
