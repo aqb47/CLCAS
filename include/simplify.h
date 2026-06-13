@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <math.h>
 
-// Modify AST with simplified expressions
+// Simplify entire AST 
 void simplify(Node* node);
 
 #endif

@@ -5,11 +5,11 @@
 int main(void) {
     // Parser round-trip
     Lexer l; 
-    lexer_init(&l, "1 + 2 + 3*4 + 9 - 8^2 + 8^(5/3)");
+    lexer_init(&l, " (x + y) ^ 1");
     
     Node *parsed = parse_expr(&l, 0);
     simplify(parsed);
-    
+
     node_print_infix(parsed);
     printf("\n");
     node_print_prefix(parsed);
