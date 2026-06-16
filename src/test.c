@@ -5,7 +5,7 @@
 int main(void) {
     // Parser round-trip
     Lexer l; 
-    lexer_init(&l, "(2 + 3) * (4 - 1)");
+    lexer_init(&l, "-(0 - x)");
     
     Node *parsed = parse_expr(&l, 0);
     
