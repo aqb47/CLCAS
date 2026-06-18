@@ -243,3 +243,12 @@ char get_operation_symbol(NodeType operation_enum) {
         default: return '?';
     }
 }
+
+int is_binary_operation(NodeType node_type) {
+    if (node_type == NODE_ADD || node_type == NODE_SUB || node_type == NODE_MUL || node_type == NODE_DIV || node_type == NODE_POW) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}

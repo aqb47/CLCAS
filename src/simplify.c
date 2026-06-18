@@ -5,8 +5,6 @@
 #include <ctype.h>
 #include <math.h>
 
-static int is_binary_operation(NodeType node_type);
-
 Node* simplify(Node* node) {
     if (is_binary_operation(node->type)) {
         // Go deeper for non-numerical child nodes
@@ -199,13 +197,4 @@ Node* simplify(Node* node) {
     }
 
     return node;
-}
-
-int is_binary_operation(NodeType node_type) {
-    if (node_type == NODE_ADD || node_type == NODE_SUB || node_type == NODE_MUL || node_type == NODE_DIV || node_type == NODE_POW) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
 }

@@ -1,19 +1,21 @@
 #include "ast.h"
 #include "parser.h"
 #include "simplify.h"
+#include "diff.h"
 
 int main(void) {
     // Parser round-trip
     Lexer l; 
-    lexer_init(&l, "-(0 - x)");
+    lexer_init(&l, "x*x");
     
-    Node *parsed = parse_expr(&l, 0);
+    Node *parsed = simplify(parse_expr(&l, 0));
     
-    parsed = simplify(parsed);
+    Node* derivative = simplify(differentiate(parsed, 'x'));
 
-    node_print_infix(parsed);
+    node_print_infix(derivative);
     printf("\n");
 
+    node_free(derivative);
     node_free(parsed);
     return 0;
 }

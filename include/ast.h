@@ -87,4 +87,7 @@ void node_print_prefix(const Node* node);
 // Print tree in infix format
 void node_print_infix(const Node* node);
 
+// Tells you if a type is a binop
+int is_binary_operation(NodeType node_type);
+
 #endif
