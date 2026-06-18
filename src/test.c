@@ -6,7 +6,7 @@
 int main(void) {
     // Parser round-trip
     Lexer l; 
-    lexer_init(&l, "x*x");
+    lexer_init(&l, "sin(x ^ 2)");
     
     Node *parsed = simplify(parse_expr(&l, 0));
     

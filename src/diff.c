@@ -3,6 +3,7 @@
 #include "diff.h"
 
 #include <math.h>
+#include <string.h>
 
 Node* differentiate(const Node* node, char variable) {
     Node* derivative;
@@ -69,11 +70,36 @@ Node* differentiate(const Node* node, char variable) {
                             )
                         );
         }
+    }
 
-        // d/dx(f(g)) = f' * g'
-        else if (node->type == NODE_FUNC) {
-            printf("I'll come back to this later\n");
+    // Unary stuff
+    else if (node->type == NODE_FUNC) {
+        // d/dx(sin(g)) = cos(g) * g'
+        if (strcmp(node->Function.function_name, "sin") == 0) {
+            derivative = node_binop(NODE_MUL,
+                            node_func("cos", node->Function.child),
+                            differentiate(node->Function.child, variable)
+                        );
         }
+        // d/dx(cos(g)) = - sin(g) * g'
+        else if (strcmp(node->Function.function_name, "cos") == 0) {
+            derivative = node_neg(
+                            node_binop(NODE_MUL,
+                                node_func("sin", node->Function.child),
+                                differentiate(node->Function.child, variable)
+                            )
+                        );
+        }
+        // d/dx(ln(g)) = g' / g
+        else if (strcmp(node->Function.function_name, "ln") == 0) {
+            derivative = node_binop(NODE_DIV,
+                            differentiate(node->Function.child, variable),
+                            node->Function.child
+                        );
+        }
+    }
+    else if (node->type == NODE_NEG) {
+        derivative = node_neg(differentiate(node->UnaryOperation.child, variable));
     }
 
     return derivative;
