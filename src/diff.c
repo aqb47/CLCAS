@@ -42,8 +42,8 @@ Node* differentiate(const Node* node, char variable) {
         // d/dx(f * g) = f * g' + f' * g
         else if (node->type == NODE_MUL) {
             derivative = node_binop(NODE_ADD, 
-                            node_binop(NODE_MUL, f, g_prime),
-                            node_binop(NODE_MUL, f_prime, g)
+                            node_binop(NODE_MUL, node_copy(f), g_prime),
+                            node_binop(NODE_MUL, f_prime, node_copy(g))
                         );
         }
 
@@ -51,11 +51,11 @@ Node* differentiate(const Node* node, char variable) {
         else if (node->type == NODE_DIV) {
             derivative = node_binop(NODE_DIV,
                             node_binop(NODE_SUB,
-                                    node_binop(NODE_MUL, g, f_prime),
-                                    node_binop(NODE_MUL, f, g_prime)
+                                    node_binop(NODE_MUL, node_copy(g), f_prime),
+                                    node_binop(NODE_MUL, node_copy(f), g_prime)
                             ),
                             node_binop(NODE_POW,
-                                g, node_num(2)
+                                node_copy(g), node_num(2)
                             )
                         );
         }
@@ -63,10 +63,10 @@ Node* differentiate(const Node* node, char variable) {
         // d/dx(f^g) = f^g * (g * (f' / f) + ln(f) * g')
         else if (node->type == NODE_POW) {
             derivative = node_binop(NODE_MUL,
-                            node_binop(NODE_POW, f, g),
+                            node_binop(NODE_POW, node_copy(f), node_copy(g)),
                             node_binop(NODE_ADD,
-                                node_binop(NODE_MUL, node_func("ln", f), g_prime),
-                                node_binop(NODE_MUL, node_binop(NODE_DIV, f_prime, f), g)
+                                node_binop(NODE_MUL, node_func("ln", node_copy(f)), g_prime),
+                                node_binop(NODE_MUL, node_binop(NODE_DIV, f_prime, node_copy(f)), node_copy(g))
                             )
                         );
         }
@@ -74,32 +74,49 @@ Node* differentiate(const Node* node, char variable) {
 
     // Unary stuff
     else if (node->type == NODE_FUNC) {
+        // In case of an unknown function we'll add a ' after its name to indicate derivative (e.g sin(x) -> sin'(x))
+        char function_prime[FUNCTION_NAME_LENGTH + 1];
+        snprintf(function_prime, sizeof(function_prime), "%s'", node->Function.function_name);
+
+        Node* g = node->Function.child;
+        Node* g_prime = differentiate(g, variable);
+
         // d/dx(sin(g)) = cos(g) * g'
         if (strcmp(node->Function.function_name, "sin") == 0) {
             derivative = node_binop(NODE_MUL,
-                            node_func("cos", node->Function.child),
-                            differentiate(node->Function.child, variable)
+                            node_func("cos", node_copy(g)),
+                            g_prime
                         );
         }
         // d/dx(cos(g)) = - sin(g) * g'
         else if (strcmp(node->Function.function_name, "cos") == 0) {
             derivative = node_neg(
                             node_binop(NODE_MUL,
-                                node_func("sin", node->Function.child),
-                                differentiate(node->Function.child, variable)
+                                node_func("sin", node_copy(g)),
+                                g_prime
                             )
                         );
         }
         // d/dx(ln(g)) = g' / g
         else if (strcmp(node->Function.function_name, "ln") == 0) {
             derivative = node_binop(NODE_DIV,
-                            differentiate(node->Function.child, variable),
-                            node->Function.child
+                            g_prime,
+                            node_copy(g)
+                        );
+        }
+        // d/dx(f(g)) = f'(g) * g'
+        else {
+            derivative = node_binop(NODE_MUL,
+                            node_func(function_prime, node_copy(g)),
+                            g_prime
                         );
         }
     }
     else if (node->type == NODE_NEG) {
-        derivative = node_neg(differentiate(node->UnaryOperation.child, variable));
+        Node* g = node->UnaryOperation.child;
+        Node* g_prime = differentiate(g, variable);
+
+        derivative = node_neg(g_prime);
     }
 
     return derivative;

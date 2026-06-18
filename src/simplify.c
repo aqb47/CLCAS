@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "ast.h"
 
+#include <string.h>
 #include <ctype.h>
 #include <math.h>
 
@@ -194,6 +195,34 @@ Node* simplify(Node* node) {
 
     else if (node->type == NODE_FUNC) {
         node->Function.child = simplify(node->Function.child);
+
+        // Function can be evaluated directly as its child is numerical
+        if (node->Function.child->type == NODE_NUM) {
+            double new_node_number;
+            int valid_function = 0;
+
+            // Natural logarithm
+            if (strcmp(node->Function.function_name, "ln") == 0) {
+                valid_function = 1;
+                new_node_number = log(node->Function.child->number);
+            }
+            // Sine
+            else if (strcmp(node->Function.function_name, "sin") == 0) {
+                valid_function = 1;
+                new_node_number = sin(node->Function.child->number);
+            }
+            // Cosine
+            else if (strcmp(node->Function.function_name, "cos") == 0) {
+                valid_function = 1;
+                new_node_number = cos(node->Function.child->number);
+            }
+
+            // Use new value if we found a valid function, else leave as is
+            if (valid_function) {
+                node_free(node);
+                node = node_num(new_node_number);
+            }
+        }
     }
 
     return node;
