@@ -19,17 +19,7 @@ Node* simplify(Node* node) {
             
             double new_node_number;
 
-            switch(node->type) {
-                case(NODE_ADD): new_node_number = left_child_number + right_child_number; break;
-                case(NODE_SUB): new_node_number = left_child_number - right_child_number; break;
-                
-                case(NODE_MUL): new_node_number = left_child_number * right_child_number; break;
-                case(NODE_DIV): new_node_number = left_child_number / right_child_number; break;
-                
-                case(NODE_POW): new_node_number = pow(left_child_number, right_child_number); break;
-
-                default: break;
-            }
+            new_node_number = evaluate_binop(node->type, left_child_number, right_child_number);
 
             node_free(node);
             node = node_num(new_node_number);
@@ -199,26 +189,11 @@ Node* simplify(Node* node) {
         // Function can be evaluated directly as its child is numerical
         if (node->Function.child->type == NODE_NUM) {
             double new_node_number;
-            int valid_function = 0;
 
-            // Natural logarithm
-            if (strcmp(node->Function.function_name, "ln") == 0) {
-                valid_function = 1;
-                new_node_number = log(node->Function.child->number);
-            }
-            // Sine
-            else if (strcmp(node->Function.function_name, "sin") == 0) {
-                valid_function = 1;
-                new_node_number = sin(node->Function.child->number);
-            }
-            // Cosine
-            else if (strcmp(node->Function.function_name, "cos") == 0) {
-                valid_function = 1;
-                new_node_number = cos(node->Function.child->number);
-            }
+            new_node_number = evaluate_function(node->Function.function_name, node->Function.child->number);
 
             // Use new value if we found a valid function, else leave as is
-            if (valid_function) {
+            if (!isnan(new_node_number)) {
                 node_free(node);
                 node = node_num(new_node_number);
             }
@@ -226,4 +201,47 @@ Node* simplify(Node* node) {
     }
 
     return node;
+}
+
+double evaluate_binop(NodeType binop, double left_child_value, double right_child_value) {
+    switch(binop) {
+        case(NODE_ADD): return left_child_value + right_child_value;
+        case(NODE_SUB): return left_child_value - right_child_value;
+
+        case(NODE_MUL): return left_child_value * right_child_value;
+        case(NODE_DIV): return left_child_value / right_child_value;
+
+        case(NODE_POW): return pow(left_child_value, right_child_value);
+
+        default: return NAN;
+    }
+}
+
+double evaluate_function(const char* function, double child_value) {
+    // Natural logarithm
+    if (strcmp(function, "ln") == 0) {
+        return log(child_value);
+    }
+    // Exponent
+    else if (strcmp(function, "exp") == 0) {
+        return exp(child_value);
+    }
+
+    // Sine
+    else if (strcmp(function, "sin") == 0) {
+        return sin(child_value);
+    }
+    // Cosine
+    else if (strcmp(function, "cos") == 0) {
+        return cos(child_value);
+    }
+    // Tangent
+    else if (strcmp(function, "tan") == 0) {
+        return tan(child_value);
+    }
+
+    // Unknown function
+    else {
+        return NAN;
+    }
 }

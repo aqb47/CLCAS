@@ -97,6 +97,25 @@ Node* differentiate(const Node* node, char variable) {
                             )
                         );
         }
+        // d/dx(tan(g)) = (1 / cos(g)) ^ 2 * g'
+        else if (strcmp(node->Function.function_name, "tan") == 0) {
+            derivative = node_binop(NODE_MUL,
+                            node_binop(NODE_POW,
+                                node_binop(NODE_DIV,
+                                    node_num(1), node_func("cos", node_copy(g))
+                                ),
+                                node_num(2)
+                            ),
+                            g_prime
+                        );
+        }
+        // d/dx(exp(g)) = exp(g) * g' 
+        else if (strcmp(node->Function.function_name, "exp") == 0) {
+            derivative = node_binop(NODE_MUL,
+                            node_func("exp", node_copy(g)),
+                            g_prime
+                        );
+        }
         // d/dx(ln(g)) = g' / g
         else if (strcmp(node->Function.function_name, "ln") == 0) {
             derivative = node_binop(NODE_DIV,
