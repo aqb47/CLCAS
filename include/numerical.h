@@ -9,4 +9,7 @@ double node_eval(Node* node, char variable, double variable_value);
 // [For 'n' as order, 'x' as variable and 'a' as center]
 Node* taylor_series(Node* node, char variable, double center, int order);
 
+// Taylor series centered at 0
+Node* maclaurin_series(Node* node, char variable, int order);
+
 #endif

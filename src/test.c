@@ -11,7 +11,7 @@ int main(void) {
     
     Node *parsed = simplify(parse_expr(&l, 0));
     Node* derivative = simplify(differentiate(parsed, 'x'));
-    Node* series = simplify(taylor_series(parsed, 'x', 0, 10));
+    Node* series = maclaurin_series(parsed, 'x', 10);
 
     node_print_infix(parsed);
     printf("\n");

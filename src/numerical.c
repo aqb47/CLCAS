@@ -5,7 +5,7 @@
 
 #include <math.h>
 
-long factorial(long number);
+static long factorial(long number);
 
 double node_eval(Node* node, char variable, double variable_value) {
     // Simplify node first
@@ -91,4 +91,8 @@ Node* taylor_series(Node* node, char variable, double center, int order) {
     node_free(base);
 
     return result;
+}
+
+Node* maclaurin_series(Node* node, char variable, int order) {
+    return taylor_series(node, variable, 0, order);
 }
