@@ -96,3 +96,28 @@ Node* taylor_series(Node* node, char variable, double center, int order) {
 Node* maclaurin_series(Node* node, char variable, int order) {
     return taylor_series(node, variable, 0, order);
 }
+
+double newton_rhapson_root(Node* node, char variable, double x0, double tolerance, int max_iteration) {
+    Node* derivative = simplify(differentiate(node, variable));
+    double x1;
+
+    // Keep performing operation until we hit max iterations
+    for (int i = 0; i < max_iteration; i++) {
+        double f_x0 = node_eval(node, variable, x0);
+
+        double f_prime_x0 = node_eval(derivative, variable, x0);
+        if (fabs(f_prime_x0) < 1e-14) {
+            break;
+        }
+
+        x1 = x0 - f_x0 / f_prime_x0;
+        if (fabs(x1 - x0) <= tolerance) {
+            break;
+        }
+
+        x0 = x1;
+    }
+    
+    node_free(derivative);
+    return x0;
+}

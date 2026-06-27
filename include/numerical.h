@@ -12,4 +12,7 @@ Node* taylor_series(Node* node, char variable, double center, int order);
 // Taylor series centered at 0
 Node* maclaurin_series(Node* node, char variable, int order);
 
+// Find root by Newton-Rhapson method
+double newton_rhapson_root(Node* node, char variable, double x0, double tolerance, int max_iteration);
+
 #endif
