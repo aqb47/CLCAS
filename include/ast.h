@@ -90,4 +90,7 @@ void node_print_infix(const Node* node);
 // Tells you if a type is a binop
 int is_binary_operation(NodeType node_type);
 
+// Within tree replace instances of variable with variable value and return the total evaluated value of tree. Depends on helpers from simplify.h
+double node_eval(const Node* node, char variable, double variable_value);
+
 #endif

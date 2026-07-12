@@ -9,7 +9,7 @@ int main(void) {
     Lexer l; 
     lexer_init(&l, "exp(x) - x^3 + 4*x^2");
     
-    Node *parsed = simplify(parse_expr(&l, 0));
+    Node* parsed = simplify(parse_expr(&l, 0));
     Node* derivative = simplify(differentiate(parsed, 'x'));
     Node* series = maclaurin_series(parsed, 'x', 5);
 

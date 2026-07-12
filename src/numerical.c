@@ -9,45 +9,8 @@
 #define MAX_DEPTH 50
 
 static long factorial(long number);
-
-double node_eval(Node* node, char variable, double variable_value) {
-    // Simplify node first
-    node = simplify(node);
-
-    // Base cases
-    if (node->type == NODE_NUM) {
-        return node->number;
-    }
-    else if (node->type == NODE_VAR) {
-        if (node->variable == variable) {
-            return variable_value;
-        }
-        // Treat other variables = 0 for now
-        else {
-            return 0.0;
-        }
-    }
-
-    // Binary operations
-    else if (is_binary_operation(node->type)) {
-        double left_child_eval = node_eval(node->BinaryOperation.left_child, variable, variable_value);
-        double right_child_eval = node_eval(node->BinaryOperation.right_child, variable, variable_value);
-
-        return evaluate_binop(node->type, left_child_eval, right_child_eval);
-    }
-    
-    // Unary stuff
-    else if (node->type == NODE_NEG) {
-        return -node_eval(node->UnaryOperation.child, variable, variable_value);
-    }
-    else if (node->type == NODE_FUNC) {
-        return evaluate_function(node->Function.function_name, node_eval(node->Function.child, variable, variable_value));
-    }
-
-    else {
-        return NAN;
-    }
-}
+static double simpson(Node* node, char variable, double a, double b);
+static double adaptive_simpson(Node* node, char variable, double a, double b, double tolerance, int depth);
 
 long factorial(long number) {
     if (number == 1 || number == 0) {
@@ -68,6 +31,9 @@ Node* taylor_series(Node* node, char variable, double center, int order) {
     for (int i = 0; i <= order; i++) {
         // fn(a) / n!
         double coefficient = node_eval(current_derivative, variable, center) / factorial(i);
+        if (fabs(coefficient) < 1e-14) {
+            continue;
+        }
 
         // (fn(a) / n!) * (x - a) ^ n
         Node* term = node_binop(NODE_MUL, 
@@ -115,6 +81,7 @@ double newton_rhapson_root(Node* node, char variable, double x0, double toleranc
 
         x1 = x0 - f_x0 / f_prime_x0;
         if (fabs(x1 - x0) <= tolerance) {
+            x0 = x1;
             break;
         }
 
