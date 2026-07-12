@@ -1,6 +1,10 @@
 #ifndef NUMERICAL_H
 #define NUMERICAL_H
 
+// Default tolerances
+#define DEFAULT_TOLERANCE_SIMPSON 1e-8
+#define DEFAULT_TOLERANCE_NEWTON_RHAPSON 1e-6
+
 // Within tree replace instances of variable with variable value and return the total evaluated value of tree
 double node_eval(Node* node, char variable, double variable_value);
 
@@ -14,5 +18,8 @@ Node* maclaurin_series(Node* node, char variable, int order);
 
 // Find root by Newton-Rhapson method
 double newton_rhapson_root(Node* node, char variable, double x0, double tolerance, int max_iteration);
+
+// Compute integral by adaptive Simpson's rule for definite integration
+double simpson_integrate(Node* node, char variable, double a, double b, double tolerance);
 
 #endif

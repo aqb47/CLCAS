@@ -5,6 +5,9 @@
 
 #include <math.h>
 
+// Maximum recursive depth of adaptive Simpson integration
+#define MAX_DEPTH 50
+
 static long factorial(long number);
 
 double node_eval(Node* node, char variable, double variable_value) {
@@ -120,4 +123,32 @@ double newton_rhapson_root(Node* node, char variable, double x0, double toleranc
     
     node_free(derivative);
     return x0;
+}
+
+// Perform Simpson's rule for n = 2
+double simpson(Node* node, char variable, double a, double b) {
+    double midpoint = (a + b) / 2;
+
+    return ((b - a) / 6) * (node_eval(node, variable, a) + 4 * node_eval(node, variable, midpoint) + node_eval(node, variable, b));
+}
+
+double adaptive_simpson(Node* node, char variable, double a, double b, double tolerance, int depth) {
+    double midpoint = (a + b) / 2;
+
+    double integral_whole = simpson(node, variable, a, b);
+    
+    double integral_left = simpson(node, variable, a, midpoint);
+    double integral_right = simpson(node, variable, midpoint, b);
+
+    double error = (integral_left + integral_right - integral_whole) / 15;
+
+    if (fabs(error) <= tolerance || depth > MAX_DEPTH) {
+        return integral_left + integral_right + error;
+    }
+
+    return adaptive_simpson(node, variable, a, midpoint, tolerance / 2, depth + 1) + adaptive_simpson(node, variable, midpoint, b, tolerance / 2, depth + 1);
+}
+
+double simpson_integrate(Node* node, char variable, double a, double b, double tolerance) {
+    return adaptive_simpson(node, variable, a, b, tolerance, 0);
 }
