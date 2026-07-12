@@ -13,7 +13,7 @@ int main(void) {
     Node* derivative = simplify(differentiate(parsed, 'x'));
     Node* series = maclaurin_series(parsed, 'x', 5);
 
-    double guess = newton_rhapson_root(parsed, 'x', -2, DEFAULT_TOLERANCE_NEWTON_RHAPSON, 5);
+    double guess = newton_rhapson_root(parsed, 'x', -2, DEFAULT_TOLERANCE_NEWTON_RHAPSON, DEFAULT_MAX_ITERATION);
 
     node_print_infix(parsed);
     printf("\n");

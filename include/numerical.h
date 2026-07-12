@@ -5,6 +5,8 @@
 #define DEFAULT_TOLERANCE_SIMPSON 1e-8
 #define DEFAULT_TOLERANCE_NEWTON_RHAPSON 1e-6
 
+#define DEFAULT_MAX_ITERATION 5
+
 // Within tree replace instances of variable with variable value and return the total evaluated value of tree
 double node_eval(Node* node, char variable, double variable_value);
 
