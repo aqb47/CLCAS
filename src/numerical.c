@@ -10,7 +10,7 @@
 
 static long factorial(long number);
 static double simpson(Node* node, char variable, double a, double b);
-static double adaptive_simpson(Node* node, char variable, double a, double b, double tolerance, int depth);
+static double adaptive_simpson(Node* node, char variable, double a, double b, double integral_whole, double tolerance, int depth);
 
 long factorial(long number) {
     if (number == 1 || number == 0) {
@@ -25,35 +25,37 @@ Node* taylor_series(Node* node, char variable, double center, int order) {
 
     // (x - a)
     Node* base = node_binop(NODE_SUB, node_var(variable), node_num(center));
-    Node* result;
+    Node* result = NULL;
 
     // From 0 to n
     for (int i = 0; i <= order; i++) {
         // fn(a) / n!
         double coefficient = node_eval(current_derivative, variable, center) / factorial(i);
-        if (fabs(coefficient) < 1e-14) {
-            continue;
-        }
 
-        // (fn(a) / n!) * (x - a) ^ n
-        Node* term = node_binop(NODE_MUL, 
-                        node_num(coefficient), 
-                        node_binop(NODE_POW, node_copy(base), node_num(i))
-                    );
+        // Add non-zero terms
+        if (fabs(coefficient) > 1e-14) {
+            // (fn(a) / n!) * (x - a) ^ n
+            Node* term = node_binop(NODE_MUL, 
+                            node_num(coefficient), 
+                            node_binop(NODE_POW, node_copy(base), node_num(i))
+                        );
 
-        // First value means no addition
-        if (i == 0) {
-            result = term;
-        }
-        // Else add term to result
-        else {
-            result = node_binop(NODE_ADD, result, term);
+            // If result is empty we don't add anything
+            if (result == NULL) {
+                result = term;
+            }
+            // Else add term to result
+            else {
+                result = node_binop(NODE_ADD, result, term);
+            }
         }
 
         // Advance to next derivative
-        Node* next = simplify(differentiate(current_derivative, variable));
-        node_free(current_derivative);
-        current_derivative = next;
+        if (i < order) {
+            Node* next = simplify(differentiate(current_derivative, variable));
+            node_free(current_derivative);
+            current_derivative = next;
+        }
     }
 
     node_free(current_derivative);
@@ -99,10 +101,8 @@ double simpson(Node* node, char variable, double a, double b) {
     return ((b - a) / 6) * (node_eval(node, variable, a) + 4 * node_eval(node, variable, midpoint) + node_eval(node, variable, b));
 }
 
-double adaptive_simpson(Node* node, char variable, double a, double b, double tolerance, int depth) {
+double adaptive_simpson(Node* node, char variable, double a, double b, double integral_whole, double tolerance, int depth) {
     double midpoint = (a + b) / 2;
-
-    double integral_whole = simpson(node, variable, a, b);
     
     double integral_left = simpson(node, variable, a, midpoint);
     double integral_right = simpson(node, variable, midpoint, b);
@@ -113,9 +113,12 @@ double adaptive_simpson(Node* node, char variable, double a, double b, double to
         return integral_left + integral_right + error;
     }
 
-    return adaptive_simpson(node, variable, a, midpoint, tolerance / 2, depth + 1) + adaptive_simpson(node, variable, midpoint, b, tolerance / 2, depth + 1);
+    integral_left = adaptive_simpson(node, variable, a, midpoint, integral_left, tolerance / 2, depth + 1);
+    integral_right = adaptive_simpson(node, variable, midpoint, b, integral_right, tolerance / 2, depth + 1);
+
+    return integral_left + integral_right;
 }
 
 double simpson_integrate(Node* node, char variable, double a, double b, double tolerance) {
-    return adaptive_simpson(node, variable, a, b, tolerance, 0);
+    return adaptive_simpson(node, variable, a, b, simpson(node, variable, a, b), tolerance, 0);
 }

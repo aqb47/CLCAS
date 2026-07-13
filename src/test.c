@@ -11,7 +11,7 @@ int main(void) {
     
     Node* parsed = simplify(parse_expr(&l, 0));
     Node* derivative = simplify(differentiate(parsed, 'x'));
-    Node* series = maclaurin_series(parsed, 'x', 5);
+    Node* series = simplify(maclaurin_series(parsed, 'x', 5));
 
     double guess = newton_rhapson_root(parsed, 'x', -2, DEFAULT_TOLERANCE_NEWTON_RHAPSON, DEFAULT_MAX_ITERATION);
 

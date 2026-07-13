@@ -17,4 +17,7 @@ double evaluate_binop(NodeType binop, double left_child_value, double right_chil
 // Evaluate function operation based on name and children values
 double evaluate_function(const char* function, double child_value);
 
+// Within tree replace instances of variable with variable value and return the total evaluated value of tree. Depends on helpers from simplify.h
+double node_eval(const Node* node, char variable, double variable_value);
+
 #endif
