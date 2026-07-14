@@ -18,6 +18,13 @@ static NodeType toktype_to_nodetype(TokType token_type);
 
 static Node* parse_prefix(Lexer* lexer);
 
+Node* parse_string(const char* source) {
+    Lexer l;
+    lexer_init(&l, source);
+
+    return parse_expr(&l, 0);
+}
+
 Node* parse_expr(Lexer* lexer, int min_binding_power) {
     // Parse left hand side (handles unary functions and operations)
     Node* lhs = parse_prefix(lexer);

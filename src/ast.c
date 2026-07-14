@@ -255,13 +255,37 @@ int is_binary_operation(NodeType node_type) {
 }
 
 int node_comp(Node* node_1, Node* node_2) {
+    NodeType common_type;
+
     // Base cases
-    if (node_1->type == NODE_NUM && node_2->type == NODE_NUM) {
+    if (node_1->type != node_2->type) {
+        return 0;
+    }
+    else {
+        common_type = node_1->type;
+    }
+
+    if (common_type == NODE_NUM) {
         if (node_1->number == node_2->number) return 1;
         else return 0;
     }
-    else if (node_1->type == NODE_VAR && node_2->type == NODE_VAR) {
+    else if (common_type == NODE_VAR) {
         if (node_1->variable == node_2->variable) return 1;
         else return 0;
     }
+    else if (is_binary_operation(common_type)) {
+        return node_comp(node_1->BinaryOperation.left_child, node_2->BinaryOperation.left_child) && node_comp(node_1->BinaryOperation.right_child, node_2->BinaryOperation.right_child);
+    }
+    else if (common_type == NODE_FUNC) {
+        // See if function matches
+        if (strcmp(node_1->Function.function_name, node_2->Function.function_name) != 0) {
+            return 0;
+        }
+        else return node_comp(node_1->Function.child, node_2->Function.child);
+    }
+    else if (common_type == NODE_NEG) {
+        return node_comp(node_1->UnaryOperation.child, node_2->UnaryOperation.child);
+    }
+    
+    return 0;
 }

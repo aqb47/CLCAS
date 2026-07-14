@@ -56,4 +56,7 @@ void lexer_init(Lexer* lexer, const char* source);
 // Parse lexer depending on a minimum binding power which represents operation precedence. Main Pratt parser, uses loop + recursion. Will return head of created abstract syntax tree
 Node* parse_expr(Lexer* lexer, int min_binding_power);
 
+// Parse a string by using lexer and parse_expr functions
+Node* parse_string(const char* source);
+
 #endif

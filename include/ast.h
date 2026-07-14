@@ -90,4 +90,7 @@ void node_print_infix(const Node* node);
 // Tells you if a type is a binop
 int is_binary_operation(NodeType node_type);
 
+// Check if two nodes are equivalent
+int node_comp(Node* node_1, Node* node_2);
+
 #endif
