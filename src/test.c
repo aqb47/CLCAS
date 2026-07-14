@@ -12,6 +12,8 @@ int main(void) {
     Node* comparison_test_1 = simplify(parse_string("sin(x + 3*x) - 4"));
     Node* comparison_test_2 = simplify(parse_string("sin(x + 3*x*1) + 0 - 4"));
 
+    Node* power_test = simplify(simplify(parse_string("x^5 * x^2")));
+
     double guess = newton_rhapson_root(parsed, 'x', -2, DEFAULT_TOLERANCE_NEWTON_RHAPSON, DEFAULT_MAX_ITERATION);
 
     node_print_infix(parsed);
@@ -21,6 +23,9 @@ int main(void) {
     printf("\n");
 
     node_print_infix(series);
+    printf("\n");
+
+    node_print_infix(power_test);
     printf("\n");
 
     printf("Parsed evaluated value: %lf\n", node_eval(parsed, 'x', 1));
@@ -37,5 +42,7 @@ int main(void) {
     node_free(comparison_test_1);
     node_free(comparison_test_2);
     
+    node_free(power_test);
+
     return 0;
 }

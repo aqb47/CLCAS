@@ -83,6 +83,16 @@ Node* simplify(Node* node) {
                         break;
                     }
 
+                    // 1/expression -> expression^(-1)
+                    case(NODE_DIV):
+                        Node* expression = node_copy(node->BinaryOperation.right_child);
+
+                        node_free(node);
+
+                        node = node_binop(NODE_POW, expression, node_num(-1));
+
+                        break;
+
                     // 1^ -> 1
                     case(NODE_POW):
                         node_free(node);
@@ -155,6 +165,39 @@ Node* simplify(Node* node) {
                     
                     default: break;
                 }
+            }
+        }
+
+        else if (is_binary_operation(node->BinaryOperation.left_child->type) && is_binary_operation(node->BinaryOperation.right_child->type)) {
+            // Cases where we have * (^ expression num1) (^ expression num2) and exponent can be reduced
+            if (node->BinaryOperation.left_child->type == NODE_POW && 
+                node->BinaryOperation.right_child->type == NODE_POW &&
+                node->BinaryOperation.left_child->BinaryOperation.right_child->type == NODE_NUM &&
+                node->BinaryOperation.right_child->BinaryOperation.right_child->type == NODE_NUM &&
+                node_comp(node->BinaryOperation.left_child->BinaryOperation.left_child, node->BinaryOperation.right_child->BinaryOperation.left_child)) {
+                    int resultant_power;
+
+                    int left_power = node->BinaryOperation.left_child->BinaryOperation.right_child->number;
+                    int right_power = node->BinaryOperation.right_child->BinaryOperation.right_child->number;
+                    
+                    Node* expression = node_copy(node->BinaryOperation.left_child->BinaryOperation.left_child);
+
+                    if (node->type == NODE_MUL) {
+                        resultant_power = left_power + right_power;
+                    }
+                    else if (node->type == NODE_DIV) {
+                        resultant_power = left_power - right_power;
+                    }
+
+                    node_free(node);
+
+                    if (resultant_power == 0) {
+                        node = node_num(1);
+                        node_free(expression);
+                    }
+                    else if (resultant_power == 1) node = expression;
+                    else node = simplify(node_binop(NODE_POW, expression, node_num(resultant_power)));
+
             }
         }
     }
