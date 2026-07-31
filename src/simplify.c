@@ -170,7 +170,8 @@ Node* simplify(Node* node) {
 
         else if (is_binary_operation(node->BinaryOperation.left_child->type) && is_binary_operation(node->BinaryOperation.right_child->type)) {
             // Cases where we have * (^ expression num1) (^ expression num2) and exponent can be reduced
-            if (node->BinaryOperation.left_child->type == NODE_POW && 
+            if ((node->type == NODE_MUL || node->type == NODE_DIV) &&    
+                node->BinaryOperation.left_child->type == NODE_POW && 
                 node->BinaryOperation.right_child->type == NODE_POW &&
                 node->BinaryOperation.left_child->BinaryOperation.right_child->type == NODE_NUM &&
                 node->BinaryOperation.right_child->BinaryOperation.right_child->type == NODE_NUM &&
@@ -180,14 +181,13 @@ Node* simplify(Node* node) {
                     int left_power = node->BinaryOperation.left_child->BinaryOperation.right_child->number;
                     int right_power = node->BinaryOperation.right_child->BinaryOperation.right_child->number;
                     
+                    switch (node->type) {
+                        case(NODE_MUL): resultant_power = left_power + right_power; break;
+                        case(NODE_DIV): resultant_power = left_power - right_power; break;
+                        default: break;
+                    }
+                    
                     Node* expression = node_copy(node->BinaryOperation.left_child->BinaryOperation.left_child);
-
-                    if (node->type == NODE_MUL) {
-                        resultant_power = left_power + right_power;
-                    }
-                    else if (node->type == NODE_DIV) {
-                        resultant_power = left_power - right_power;
-                    }
 
                     node_free(node);
 
